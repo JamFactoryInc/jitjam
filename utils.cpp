@@ -85,3 +85,9 @@ void logger::_format(std::basic_ostream<char> &ostream, const char *msg, std::in
 }
 
 
+void test(int (*wow)()) {
+
+    wow();
+
+}
+

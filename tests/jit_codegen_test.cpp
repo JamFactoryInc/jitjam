@@ -1454,7 +1454,7 @@ TEST_SUITE("Codegen Tests") {
             auto b = gen.temp_local<int_jt>();
         }
 
-        Mem sum_2;
+        Mem sum_2 {};
         {
             auto a = gen.temp_local<int_jt>();
             auto b = gen.temp_local<int_jt>();
@@ -1511,6 +1511,30 @@ TEST_SUITE("Codegen Tests") {
         // 16 for the 2 temp ints used in each function,
         // and 8 * 3 for the 3 return values kept alive by our sum_1 - 3
         assert_state(gen, 24, 0, 0, 0, 0)
+
+        gen.free_fn(fn);
+    }
+
+    TEST_CASE("test sum of temp locals 2") {
+        Asm gen = Asm();
+
+        auto print_fn = []() {
+            std::cout << "Hello, world!" << std::endl;
+        };
+
+        // TODO: figure out how to store / restore scratch registers before and after function call
+        // we have to load them to the stack, but we'll have to figure out how to minimise stack usage by loading / restoring only the in-use registers
+        // use float_registers_in_use & general_registers_in_use
+        Mem val = gen.set_const(gen.temp_local<int_jt>(), 123);
+
+        gen.call_static(print_fn);
+
+        gen.return_value(val);
+
+        auto fn = gen.compile<int_jt>();
+        int_jt result = fn();
+
+        CHECK_EQ(123, result);
 
         gen.free_fn(fn);
     }

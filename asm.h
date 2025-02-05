@@ -12,7 +12,7 @@
 #include <functional>
 #include <unordered_set>
 #include <memory>
-#include <math.h>
+#include <cmath>
 
 using namespace jt;
 
@@ -164,6 +164,14 @@ struct Asm {
                 stack_size += size;
             }
         }
+    }
+
+    void pre_call_save() {
+
+    }
+
+    void post_call_restore() {
+
     }
 
     int get_general_scratch() {
@@ -819,6 +827,26 @@ public:
         not_equal(Mem::R0, Mem::R1, dst);
         return dst;
     }
+
+    void call_static_fast(void (*fn_ptr)()) {
+        auto fn_ptr_int = (sljit2_uw)(fn_ptr);
+        write_instr([=]() {
+            sljit2_jump *jmp = sljit2_emit_jump(compiler, SLJIT2_FAST_CALL);
+            sljit2_set_target(jmp, fn_ptr_int);
+        });
+    }
+
+    void call_static(void (*fn_ptr)()) {
+        auto fn_ptr_int = (sljit2_uw)(fn_ptr);
+        write_instr([=]() {
+            sljit2_jump *jmp = sljit2_emit_call(compiler, SLJIT2_CALL, SLJIT2_ARGS0V());
+            sljit2_set_target(jmp, fn_ptr_int);
+        });
+    }
+
+//    void alloc(Mem bytes, Mem alignment) {
+//        fast_call([] () { malloc() })
+//    }
 
 //    template<typename T>
 //    Mem dereference(Mem ptr_location, Mem dst) {
