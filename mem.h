@@ -11,6 +11,7 @@
 #include "constructed_type.h"
 #include "memory_prealloc.h"
 #include "utils.h"
+#include <memory>
 #include <unordered_map>
 #include <memory>
 #include <list>
@@ -26,7 +27,7 @@ struct Jump {
 public:
 
     Jump() {
-        this->jmp = std::shared_ptr<sljit2_jump*>(new sljit2_jump*());
+        this->jmp = std::make_shared<sljit2_jump*>();
     }
 };
 
@@ -36,7 +37,7 @@ struct Label {
 public:
 
     Label() {
-        this->label = std::shared_ptr<sljit2_label*>(new sljit2_label*());
+        this->label = std::make_shared<sljit2_label*>();
     }
 };
 
@@ -85,14 +86,14 @@ template<>
 struct LocalVar<float_jt> {
     int stack_offset;
     LocalVar(int _stack_offset): stack_offset(_stack_offset) { }
-    operator FieldReference() { return FieldReference(stack_offset, 0, true); }
+    operator FieldReference() { return {stack_offset, 0, true}; }
 };
 
 template<>
 struct LocalVar<int_jt> {
     int stack_offset;
     LocalVar(int _stack_offset): stack_offset(_stack_offset) { }
-    operator FieldReference() { return FieldReference(stack_offset, 0); }
+    operator FieldReference() { return {stack_offset, 0}; }
 };
 
 
@@ -100,21 +101,21 @@ template<>
 struct LocalVar<float_jt*> {
     int stack_offset;
     LocalVar(int _stack_offset): stack_offset(_stack_offset) { }
-    operator FieldReference() { return FieldReference(stack_offset, 0, true); }
+    operator FieldReference() { return {stack_offset, 0, true}; }
 };
 
 template<typename T>
 struct LocalVar<T*> {
     int stack_offset;
     LocalVar(int _stack_offset): stack_offset(_stack_offset) { }
-    operator FieldReference() { return FieldReference(stack_offset, 0); }
+    operator FieldReference() { return {stack_offset, 0}; }
 };
 
 template<const int LEN>
 struct LocalVar<float_jt[LEN]> {
     int stack_offset;
     LocalVar(int _stack_offset): stack_offset(_stack_offset) { }
-    operator FieldReference() { return FieldReference(stack_offset, 0, true); }
+    operator FieldReference() { return {stack_offset, 0, true}; }
     FieldReference index(int idx) {
         return FieldReference(stack_offset, idx * sizeof(float_jt));
     }
@@ -124,7 +125,7 @@ template<typename T, const int LEN>
 struct LocalVar<T[LEN]> {
     int stack_offset;
     LocalVar(int _stack_offset): stack_offset(_stack_offset) { }
-    operator FieldReference() { return FieldReference(stack_offset, 0); }
+    operator FieldReference() { return {stack_offset, 0}; }
     FieldReference index(int idx) {
         return FieldReference(stack_offset, idx * sizeof(T));
     }

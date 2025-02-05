@@ -10,7 +10,7 @@ FieldReference _field<void>(int size, int stack_offset, const void *struct_addr,
     // ensure that we received a field of this struct instance
     auto field_addr_val = reinterpret_cast<size_t>(field_addr);
     auto struct_addr_val = reinterpret_cast<size_t>(struct_addr);
-    jassert::check(field_addr_val >= struct_addr_val && field_addr_val < (struct_addr_val + size));
+    Jassert::check(field_addr_val >= struct_addr_val && field_addr_val < (struct_addr_val + size));
     return { stack_offset, static_cast<int>(field_addr_val - struct_addr_val), _is_float };
 }
 

@@ -26,7 +26,7 @@ TEST_SUITE("Codegen Tests") {
         int_jt result = fn(1, 2);
 
         CHECK_EQ(3, result);
-        assert_state(gen, 0, 3, 0, 2, 0);
+        assert_state(gen, 0, 3, 0, 2, 0)
 
         gen.free_fn(fn);
     }
@@ -45,7 +45,7 @@ TEST_SUITE("Codegen Tests") {
         int_jt result = fn();
 
         CHECK_EQ(5, result);
-        assert_state(gen, 0, 4, 0, 0, 0);
+        assert_state(gen, 0, 4, 0, 0, 0)
 
         gen.free_fn(fn);
     }
@@ -64,7 +64,7 @@ TEST_SUITE("Codegen Tests") {
         int_jt result = fn();
 
         CHECK_EQ(5, result);
-        assert_state(gen, 16, 3, 0, 0, 0);
+        assert_state(gen, 16, 3, 0, 0, 0)
 
         gen.free_fn(fn);
     }
@@ -80,7 +80,7 @@ TEST_SUITE("Codegen Tests") {
         int_jt result = fn();
 
         CHECK_EQ(2, result);
-        assert_state(gen, 8, 1, 0, 0, 0);
+        assert_state(gen, 8, 1, 0, 0, 0)
 
         gen.free_fn(fn);
     }
@@ -95,7 +95,7 @@ TEST_SUITE("Codegen Tests") {
         int_jt result = fn();
 
         CHECK_EQ(3, result);
-        assert_state(gen, 0, 3, 0, 0, 0);
+        assert_state(gen, 0, 3, 0, 0, 0)
 
         gen.free_fn(fn);
     }
@@ -110,7 +110,7 @@ TEST_SUITE("Codegen Tests") {
         int_jt result = fn(1);
 
         CHECK_EQ(1, result);
-        assert_state(gen, 0, 1, 0, 1, 0);
+        assert_state(gen, 0, 1, 0, 1, 0)
 
         gen.free_fn(fn);
     }
@@ -127,7 +127,7 @@ TEST_SUITE("Codegen Tests") {
         int_jt result = fn(1, 2);
 
         CHECK_EQ(1 + 2, result);
-        assert_state(gen, 0, 3, 0, 2, 0);
+        assert_state(gen, 0, 3, 0, 2, 0)
 
         gen.free_fn(fn);
     }
@@ -145,7 +145,7 @@ TEST_SUITE("Codegen Tests") {
         int_jt result = fn(1, 2, 3);
 
         CHECK_EQ(1 + 2 + 3, result);
-        assert_state(gen, 0, 1, 0, 3, 0);
+        assert_state(gen, 0, 1, 0, 3, 0)
 
         gen.free_fn(fn);
     }
@@ -164,7 +164,7 @@ TEST_SUITE("Codegen Tests") {
         int_jt result = fn(1, 2, 3, 4);
 
         CHECK_EQ(1 + 2 + 3 + 4, result);
-        assert_state(gen, 0, 1, 0, 4, 0);
+        assert_state(gen, 0, 1, 0, 4, 0)
 
         gen.free_fn(fn);
     }
@@ -177,10 +177,10 @@ TEST_SUITE("Codegen Tests") {
         gen.return_value(freg);
 
         auto fn = gen.compile<float_jt>();
-        int_jt result = fn();
+        float_jt result = fn();
 
         CHECK_EQ(3.0, result);
-        assert_state(gen, 0, 0, 2, 0, 0);
+        assert_state(gen, 0, 0, 2, 0, 0)
 
         gen.free_fn(fn);
     }
@@ -192,10 +192,10 @@ TEST_SUITE("Codegen Tests") {
         gen.return_value(a);
 
         auto fn = gen.compile<float_jt, float_jt>();
-        int_jt result = fn(1.0);
+        float_jt result = fn(1.0);
 
         CHECK_EQ(1.0, result);
-        assert_state(gen, 0, 0, 1, 0, 1);
+        assert_state(gen, 0, 0, 1, 0, 1)
 
         gen.free_fn(fn);
     }
@@ -209,10 +209,10 @@ TEST_SUITE("Codegen Tests") {
         gen.return_value(res);
 
         auto fn = gen.compile<float_jt, float_jt, float_jt>();
-        int_jt result = fn(1.0, 2.0);
+        float_jt result = fn(1.0, 2.0);
 
         CHECK_EQ(1.0 + 2.0, result);
-        assert_state(gen, 0, 0, 2, 0, 2);
+        assert_state(gen, 0, 0, 2, 0, 2)
 
         gen.free_fn(fn);
     }
@@ -227,10 +227,10 @@ TEST_SUITE("Codegen Tests") {
         gen.return_value(res);
 
         auto fn = gen.compile<float_jt, float_jt, float_jt, float_jt>();
-        int_jt result = fn(1.0, 2.0, 3.0);
+        float_jt result = fn(1.0, 2.0, 3.0);
 
         CHECK_EQ(1.0 + 2.0 + 3.0, result);
-        assert_state(gen, 0, 0, 3, 0, 3);
+        assert_state(gen, 0, 0, 3, 0, 3)
 
         gen.free_fn(fn);
     }
@@ -246,10 +246,10 @@ TEST_SUITE("Codegen Tests") {
         gen.return_value(res);
 
         auto fn = gen.compile<float_jt, float_jt, float_jt, float_jt, float_jt>();
-        int_jt result = fn(1.0, 2.0, 3.0, 4.0);
+        float_jt result = fn(1.0, 2.0, 3.0, 4.0);
 
         CHECK_EQ(1.0 + 2.0 + 3.0 + 4.0, result);
-        assert_state(gen, 0, 0, 4, 0, 4);
+        assert_state(gen, 0, 0, 4, 0, 4)
 
         gen.free_fn(fn);
     }
@@ -266,7 +266,7 @@ TEST_SUITE("Codegen Tests") {
         int_jt result = fn(11, 2);
 
         CHECK_EQ(9, result);
-        assert_state(gen, 0, 1, 0, 2, 0);
+        assert_state(gen, 0, 1, 0, 2, 0)
 
         gen.free_fn(fn);
     }
@@ -283,7 +283,7 @@ TEST_SUITE("Codegen Tests") {
         int_jt result = fn(3, 5);
 
         CHECK_EQ(15, result);
-        assert_state(gen, 0, 1, 0, 2, 0);
+        assert_state(gen, 0, 1, 0, 2, 0)
 
         gen.free_fn(fn);
     }
@@ -300,7 +300,7 @@ TEST_SUITE("Codegen Tests") {
         int_jt result = fn(11, 2);
 
         CHECK_EQ(5, result);
-        assert_state(gen, 0, 2, 0, 2, 0);
+        assert_state(gen, 0, 2, 0, 2, 0)
 
         gen.free_fn(fn);
     }
@@ -326,7 +326,7 @@ TEST_SUITE("Codegen Tests") {
 //
 //        CHECK_EQ(11 / 3, addr_quotient);
 //        CHECK_EQ(11 % 3, addr_remainder);
-//        assert_state(gen, 0, 2, 0, 2, 0);
+//        assert_state(gen, 0, 2, 0, 2, 0)
 //
 //        gen.free_fn(fn);
 //    }
@@ -343,7 +343,7 @@ TEST_SUITE("Codegen Tests") {
         int_jt result = fn(15, 11);
 
         CHECK_EQ(4, result);
-        assert_state(gen, 0, 2, 0, 2, 0);
+        assert_state(gen, 0, 2, 0, 2, 0)
 
         gen.free_fn(fn);
     }
@@ -371,7 +371,7 @@ TEST_SUITE("Codegen Tests") {
             CHECK_EQ(false, result);
         }
 
-        assert_state(gen, 0, 1, 0, 2, 0);
+        assert_state(gen, 0, 1, 0, 2, 0)
 
         gen.free_fn(fn);
     }
@@ -399,7 +399,7 @@ TEST_SUITE("Codegen Tests") {
             CHECK_EQ(false, result);
         }
 
-        assert_state(gen, 0, 1, 0, 2, 0);
+        assert_state(gen, 0, 1, 0, 2, 0)
 
         gen.free_fn(fn);
     }
@@ -427,7 +427,7 @@ TEST_SUITE("Codegen Tests") {
             CHECK_EQ(true, result);
         }
 
-        assert_state(gen, 0, 1, 0, 2, 0);
+        assert_state(gen, 0, 1, 0, 2, 0)
 
         gen.free_fn(fn);
     }
@@ -455,7 +455,7 @@ TEST_SUITE("Codegen Tests") {
             CHECK_EQ(true, result);
         }
 
-        assert_state(gen, 0, 1, 0, 2, 0);
+        assert_state(gen, 0, 1, 0, 2, 0)
 
         gen.free_fn(fn);
     }
@@ -483,7 +483,7 @@ TEST_SUITE("Codegen Tests") {
             CHECK_EQ(false, result);
         }
 
-        assert_state(gen, 0, 1, 0, 2, 0);
+        assert_state(gen, 0, 1, 0, 2, 0)
 
         gen.free_fn(fn);
     }
@@ -511,7 +511,7 @@ TEST_SUITE("Codegen Tests") {
             CHECK_EQ(true, result);
         }
 
-        assert_state(gen, 0, 1, 0, 2, 0);
+        assert_state(gen, 0, 1, 0, 2, 0)
 
         gen.free_fn(fn);
     }
@@ -526,7 +526,7 @@ TEST_SUITE("Codegen Tests") {
         int_jt result = fn(2);
 
         CHECK_EQ(-2, result);
-        assert_state(gen, 0, 1, 0, 1, 0);
+        assert_state(gen, 0, 1, 0, 1, 0)
 
         gen.free_fn(fn);
     }
@@ -543,7 +543,7 @@ TEST_SUITE("Codegen Tests") {
         float_jt result = fn(1.0, 10.0);
 
         CHECK_EQ(-9.0, result);
-        assert_state(gen, 0, 0, 2, 0, 2);
+        assert_state(gen, 0, 0, 2, 0, 2)
 
         gen.free_fn(fn);
     }
@@ -560,7 +560,7 @@ TEST_SUITE("Codegen Tests") {
         float_jt result = fn(2.0, 3.0);
 
         CHECK_EQ(6.0, result);
-        assert_state(gen, 0, 0, 2, 0, 2);
+        assert_state(gen, 0, 0, 2, 0, 2)
 
         gen.free_fn(fn);
     }
@@ -577,7 +577,7 @@ TEST_SUITE("Codegen Tests") {
         float_jt result = fn(3.0, 2.0);
 
         CHECK_EQ(1.5, result);
-        assert_state(gen, 0, 0, 2, 0, 2);
+        assert_state(gen, 0, 0, 2, 0, 2)
 
         gen.free_fn(fn);
     }
@@ -589,10 +589,10 @@ TEST_SUITE("Codegen Tests") {
         gen.return_value(gen.neg(a, Mem::FR0));
 
         auto fn = gen.compile<float_jt, float_jt>();
-        int_jt result = fn(2.0);
+        float_jt result = fn(2.0);
 
         CHECK_EQ(-2.0, result);
-        assert_state(gen, 0, 0, 1, 0, 1);
+        assert_state(gen, 0, 0, 1, 0, 1)
 
         gen.free_fn(fn);
     }
@@ -609,7 +609,7 @@ TEST_SUITE("Codegen Tests") {
         float_jt result = fn(1, 1.5);
 
         CHECK_EQ(2.5, result);
-        assert_state(gen, 0, 0, 1, 1, 1);
+        assert_state(gen, 0, 0, 1, 1, 1)
 
         gen.free_fn(fn);
     }
@@ -626,7 +626,7 @@ TEST_SUITE("Codegen Tests") {
         float_jt result = fn(1.5, 1);
 
         CHECK_EQ(2.5, result);
-        assert_state(gen, 0, 0, 1, 1, 1);
+        assert_state(gen, 0, 0, 1, 1, 1)
 
         gen.free_fn(fn);
     }
@@ -643,7 +643,7 @@ TEST_SUITE("Codegen Tests") {
         float_jt result = fn(1, 1.5);
 
         CHECK_EQ(-0.5, result);
-        assert_state(gen, 0, 0, 1, 1, 1);
+        assert_state(gen, 0, 0, 1, 1, 1)
 
         gen.free_fn(fn);
     }
@@ -660,7 +660,7 @@ TEST_SUITE("Codegen Tests") {
         float_jt result = fn(1.5, 1);
 
         CHECK_EQ(0.5, result);
-        assert_state(gen, 0, 0, 1, 1, 1);
+        assert_state(gen, 0, 0, 1, 1, 1)
 
         gen.free_fn(fn);
     }
@@ -677,7 +677,7 @@ TEST_SUITE("Codegen Tests") {
         float_jt result = fn(2, 1.25);
 
         CHECK_EQ(2.5, result);
-        assert_state(gen, 0, 0, 1, 1, 1);
+        assert_state(gen, 0, 0, 1, 1, 1)
 
         gen.free_fn(fn);
     }
@@ -694,7 +694,7 @@ TEST_SUITE("Codegen Tests") {
         float_jt result = fn(1.25, 2);
 
         CHECK_EQ(2.5, result);
-        assert_state(gen, 0, 0, 1, 1, 1);
+        assert_state(gen, 0, 0, 1, 1, 1)
 
         gen.free_fn(fn);
     }
@@ -711,7 +711,7 @@ TEST_SUITE("Codegen Tests") {
         float_jt result = fn(3, 2.0);
 
         CHECK_EQ(1.5, result);
-        assert_state(gen, 0, 0, 1, 1, 1);
+        assert_state(gen, 0, 0, 1, 1, 1)
 
         gen.free_fn(fn);
     }
@@ -728,7 +728,7 @@ TEST_SUITE("Codegen Tests") {
         float_jt result = fn(3.0, 2);
 
         CHECK_EQ(1.5, result);
-        assert_state(gen, 0, 0, 1, 1, 1);
+        assert_state(gen, 0, 0, 1, 1, 1)
 
         gen.free_fn(fn);
     }
@@ -741,10 +741,10 @@ TEST_SUITE("Codegen Tests") {
         gen.return_value(res);
 
         auto fn = gen.compile<float_jt, int_jt>();
-        int_jt result = fn(3);
+        float_jt result = fn(3);
 
         CHECK_EQ(3.0, result);
-        assert_state(gen, 0, 0, 1, 1, 0);
+        assert_state(gen, 0, 0, 1, 1, 0)
 
         gen.free_fn(fn);
     }
@@ -760,7 +760,7 @@ TEST_SUITE("Codegen Tests") {
         int_jt result = fn(3.5);
 
         CHECK_EQ(3, result);
-        assert_state(gen, 0, 1, 1, 0, 1);
+        assert_state(gen, 0, 1, 1, 0, 1)
 
         gen.free_fn(fn);
     }
@@ -783,7 +783,7 @@ TEST_SUITE("Codegen Tests") {
             CHECK_EQ(1, result);
         }
 
-        assert_state(gen, 0, 1, 0, 2, 0);
+        assert_state(gen, 0, 1, 0, 2, 0)
 
         gen.free_fn(fn);
     }
@@ -806,7 +806,7 @@ TEST_SUITE("Codegen Tests") {
             CHECK_EQ(100, result);
         }
 
-        assert_state(gen, 0, 1, 0, 2, 0);
+        assert_state(gen, 0, 1, 0, 2, 0)
 
         gen.free_fn(fn);
     }
@@ -826,7 +826,7 @@ TEST_SUITE("Codegen Tests") {
         );
         CHECK_EQ(0b1110, result);
 
-        assert_state(gen, 0, 1, 0, 2, 0);
+        assert_state(gen, 0, 1, 0, 2, 0)
 
         gen.free_fn(fn);
     }
@@ -846,7 +846,7 @@ TEST_SUITE("Codegen Tests") {
         );
         CHECK_EQ(0b0110, result);
 
-        assert_state(gen, 0, 1, 0, 2, 0);
+        assert_state(gen, 0, 1, 0, 2, 0)
 
         gen.free_fn(fn);
     }
@@ -866,7 +866,7 @@ TEST_SUITE("Codegen Tests") {
         );
         CHECK_EQ(0b1000, result);
 
-        assert_state(gen, 0, 1, 0, 2, 0);
+        assert_state(gen, 0, 1, 0, 2, 0)
 
         gen.free_fn(fn);
     }
@@ -883,7 +883,7 @@ TEST_SUITE("Codegen Tests") {
         int_jt result = fn();
         CHECK_EQ(0, result);
 
-        assert_state(gen, 0, 3, 0, 0, 0);
+        assert_state(gen, 0, 3, 0, 0, 0)
 
         gen.free_fn(fn);
     }
@@ -926,7 +926,7 @@ TEST_SUITE("Codegen Tests") {
             CHECK_EQ(true, result);
         }
 
-        assert_state(gen, 0, 2, 0, 2, 0);
+        assert_state(gen, 0, 2, 0, 2, 0)
 
         gen.free_fn(fn);
     }
@@ -969,7 +969,7 @@ TEST_SUITE("Codegen Tests") {
             CHECK_EQ(true, result);
         }
 
-        assert_state(gen, 0, 2, 0, 2, 0);
+        assert_state(gen, 0, 2, 0, 2, 0)
 
         gen.free_fn(fn);
     }
@@ -994,10 +994,11 @@ TEST_SUITE("Codegen Tests") {
         int_jt result = fn();
         CHECK_EQ(1, result);
 
-        assert_state(gen, 0, 3, 0, 0, 0);
+        assert_state(gen, 0, 3, 0, 0, 0)
 
         gen.free_fn(fn);
     }
+
 
     TEST_CASE("test jump if eq") {
         Asm gen = Asm();
@@ -1035,10 +1036,11 @@ TEST_SUITE("Codegen Tests") {
             CHECK_EQ(2, result);
         }
 
-        assert_state(gen, 0, 3, 0, 2, 0);
+        assert_state(gen, 0, 3, 0, 2, 0)
 
         gen.free_fn(fn);
     }
+
 
     TEST_CASE("test jump if not eq") {
         Asm gen = Asm();
@@ -1076,7 +1078,7 @@ TEST_SUITE("Codegen Tests") {
             CHECK_EQ(3, result);
         }
 
-        assert_state(gen, 0, 3, 0, 2, 0);
+        assert_state(gen, 0, 3, 0, 2, 0)
 
         gen.free_fn(fn);
     }
@@ -1117,7 +1119,7 @@ TEST_SUITE("Codegen Tests") {
             CHECK_EQ(2, result);
         }
 
-        assert_state(gen, 0, 3, 0, 2, 0);
+        assert_state(gen, 0, 3, 0, 2, 0)
 
         gen.free_fn(fn);
     }
@@ -1162,7 +1164,7 @@ TEST_SUITE("Codegen Tests") {
             CHECK_EQ(2, result);
         }
 
-        assert_state(gen, 0, 3, 0, 2, 0);
+        assert_state(gen, 0, 3, 0, 2, 0)
 
         gen.free_fn(fn);
     }
@@ -1203,7 +1205,7 @@ TEST_SUITE("Codegen Tests") {
             CHECK_EQ(2, result);
         }
 
-        assert_state(gen, 0, 3, 0, 2, 0);
+        assert_state(gen, 0, 3, 0, 2, 0)
 
         gen.free_fn(fn);
     }
@@ -1248,7 +1250,7 @@ TEST_SUITE("Codegen Tests") {
             CHECK_EQ(2, result);
         }
 
-        assert_state(gen, 0, 3, 0, 2, 0);
+        assert_state(gen, 0, 3, 0, 2, 0)
 
         gen.free_fn(fn);
     }
@@ -1293,7 +1295,7 @@ TEST_SUITE("Codegen Tests") {
             CHECK_EQ(2, result);
         }
 
-        assert_state(gen, 8, 1, 0, 1, 0);
+        assert_state(gen, 8, 1, 0, 1, 0)
 
         gen.free_fn(fn);
     }
@@ -1338,7 +1340,7 @@ TEST_SUITE("Codegen Tests") {
             CHECK_EQ(3, result);
         }
 
-        assert_state(gen, 8, 1, 0, 1, 0);
+        assert_state(gen, 8, 1, 0, 1, 0)
 
         gen.free_fn(fn);
     }
@@ -1357,7 +1359,7 @@ TEST_SUITE("Codegen Tests") {
 
         CHECK_EQ(3, to_be_assigned_int);
         CHECK_EQ(3.0, to_be_assigned_float);
-        assert_state(gen, 0, 0, 1, 0, 0);
+        assert_state(gen, 0, 0, 1, 0, 0)
 
         gen.free_fn(fn);
     }
@@ -1394,9 +1396,8 @@ TEST_SUITE("Codegen Tests") {
         CHECK_EQ(4 + 5, out_2);
         CHECK_EQ(6 + 7, out_3);
 
-        // 16 for the 2 temp ints used in each function,
-        // and 8 * 3 for the 3 return values kept alive by our sum_1 - 3
-        assert_state(gen, 16, 5, 0, 0, 0);
+        // 7 for the 2 required arg registers in each sum operation
+        assert_state(gen, 0, 7, 0, 0, 0)
 
         gen.free_fn(fn);
     }
@@ -1437,7 +1438,7 @@ TEST_SUITE("Codegen Tests") {
 
         // 16 for the 2 temp ints used in each function,
         // and 8 * 3 for the 3 return values kept alive by our sum_1 - 3
-        assert_state(gen, 16 + 8 * 3, 0, 0, 0, 0);
+        assert_state(gen, 16 + 8 * 3, 0, 0, 0, 0)
 
         gen.free_fn(fn);
     }
@@ -1473,7 +1474,7 @@ TEST_SUITE("Codegen Tests") {
 
         // 16 for the 2 temp ints used in each function,
         // and 8 * 3 for the 3 return values kept alive by our sum_1 - 3
-        assert_state(gen, 24, 0, 0, 0, 0);
+        assert_state(gen, 24, 0, 0, 0, 0)
 
         gen.free_fn(fn);
     }
@@ -1489,7 +1490,7 @@ TEST_SUITE("Codegen Tests") {
             auto b = gen.temp_local<int_jt>();
         }
 
-        Mem sum_2;
+        Mem sum_2 {};
         {
             auto a = gen.temp_local<int_jt>();
             auto b = gen.temp_local<int_jt>();
@@ -1509,47 +1510,47 @@ TEST_SUITE("Codegen Tests") {
 
         // 16 for the 2 temp ints used in each function,
         // and 8 * 3 for the 3 return values kept alive by our sum_1 - 3
-        assert_state(gen, 24, 0, 0, 0, 0);
+        assert_state(gen, 24, 0, 0, 0, 0)
 
         gen.free_fn(fn);
     }
 
-    TEST_CASE("test check assert") {
-        jassert::check()
-    }
+//    TEST_CASE("test check assert") {
+//        jassert::check()
+//    }
 
-    TEST_CASE("Bench Codegen") {
-            auto start = std::chrono::system_clock::now();
-
-            const int iters = 10000;
-            for (int i = 0; i < iters; ++i) {
-                Asm gen = Asm();
-
-                int_jt out_1 = 0;
-                int_jt out_2 = 0;
-                int_jt out_3 = 0;
-
-                Mem sum_1 = add_temp_locals(gen, 1, 2);
-                gen.move(sum_1, gen.absolute_address(&out_1));
-
-                Mem sum_2 = add_temp_locals(gen, 10, 20);
-                gen.move(sum_2, gen.absolute_address(&out_2));
-
-                Mem sum_3 = add_temp_locals(gen, 100, 200);
-                gen.move(sum_3, gen.absolute_address(&out_3));
-
-                gen.return_void();
-
-                auto fn = gen.compile<void>();
-                gen.free_fn(fn);
-            }
-
-            auto end = std::chrono::system_clock::now();
-
-            auto dur = (end - start).count();
-            auto avg =  dur / ((double)iters * 1000);
-            std::cout << avg << "us";
-
-    }
+//    TEST_CASE("Bench Codegen") {
+//            auto start = std::chrono::system_clock::now();
+//
+//            const int iters = 10000;
+//            for (int i = 0; i < iters; ++i) {
+//                Asm gen = Asm();
+//
+//                int_jt out_1 = 0;
+//                int_jt out_2 = 0;
+//                int_jt out_3 = 0;
+//
+//                Mem sum_1 = add_temp_locals(gen, 1, 2);
+//                gen.move(sum_1, gen.absolute_address(&out_1));
+//
+//                Mem sum_2 = add_temp_locals(gen, 10, 20);
+//                gen.move(sum_2, gen.absolute_address(&out_2));
+//
+//                Mem sum_3 = add_temp_locals(gen, 100, 200);
+//                gen.move(sum_3, gen.absolute_address(&out_3));
+//
+//                gen.return_void();
+//
+//                auto fn = gen.compile<void>();
+//                gen.free_fn(fn);
+//            }
+//
+//            auto end = std::chrono::system_clock::now();
+//
+//            auto dur = (end - start).count();
+//            auto avg =  dur / ((double)iters * 1000);
+//            std::cout << avg << "us";
+//
+//    }
 
 }

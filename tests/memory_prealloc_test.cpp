@@ -5,7 +5,6 @@
 #include "memory_prealloc_test.h"
 #include "../memory_prealloc.h"
 #include <chrono>
-#include <thread>
 
 TEST_SUITE("Mempack Tests") {
     TEST_CASE("Sanity check") {

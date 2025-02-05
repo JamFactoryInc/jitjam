@@ -358,8 +358,8 @@ public:
 
         required_float_registers = std::max(required_float_registers, float_args);
 
-        jassert::check(required_registers <= SLJIT2_NUMBER_OF_REGISTERS, "Required more registers than available!\nRequired: {}\nAvailable: {}", { required_registers, SLJIT2_NUMBER_OF_REGISTERS });
-        jassert::check(required_float_registers <= SLJIT2_NUMBER_OF_FLOAT_REGISTERS, "Required more float registers than available!\nRequired: {}\nAvailable: {}", { required_float_registers, SLJIT2_NUMBER_OF_FLOAT_REGISTERS });
+        Jassert::check(required_registers <= SLJIT2_NUMBER_OF_REGISTERS, "Required more registers than available!\nRequired: {}\nAvailable: {}", { required_registers, SLJIT2_NUMBER_OF_REGISTERS });
+        Jassert::check(required_float_registers <= SLJIT2_NUMBER_OF_FLOAT_REGISTERS, "Required more float registers than available!\nRequired: {}\nAvailable: {}", { required_float_registers, SLJIT2_NUMBER_OF_FLOAT_REGISTERS });
 
         sljit2_emit_enter(
             compiler, 0, arg_types,
@@ -429,11 +429,11 @@ public:
 
     // A memory location representing the nth non-float argument passed to this function, where 0 is the first argument.
     Mem arg(int arg_index) {
-        jassert::check(arg_index >= 0, "Arg index must be greater than 0. Received index: {}", { arg_index });
+        Jassert::check(arg_index >= 0, "Arg index must be greater than 0. Received index: {}", { arg_index });
 
         auto *future_max_args = &args;
         write_instr([=]() {
-            jassert::check(arg_index >= 0, "Arg index outside of range defined by compiled function signature. Max index: {} Received index: {} ", { *future_max_args - 1, arg_index });
+            Jassert::check(arg_index >= 0, "Arg index outside of range defined by compiled function signature. Max index: {} Received index: {} ", { *future_max_args - 1, arg_index });
         });
 
         return Mem(_addr(_Mem { SLJIT2_S(arg_index), 0, _Mem::IS_REGISTER | _Mem::IS_ARG }), this);
@@ -441,11 +441,11 @@ public:
 
     // a float argument with the given 0-based fn arg index
     Mem float_arg(int arg_index) {
-        jassert::check(arg_index >= 0, "Float arg index must be greater than 0. Received index: {}", { arg_index });
+        Jassert::check(arg_index >= 0, "Float arg index must be greater than 0. Received index: {}", { arg_index });
 
         auto *future_max_args = &float_args;
         write_instr([=]() {
-            jassert::check(arg_index >= 0, "Float arg index outside of range defined by compiled function signature. Max index: {} Received index: {} ", { *future_max_args - 1, arg_index });
+            Jassert::check(arg_index >= 0, "Float arg index outside of range defined by compiled function signature. Max index: {} Received index: {} ", { *future_max_args - 1, arg_index });
         });
 
         return Mem(_addr(_Mem { SLJIT2_FS(arg_index), 0, _Mem::IS_REGISTER | _Mem::IS_ARG | _Mem::IS_FLOAT }), this);
@@ -464,19 +464,19 @@ public:
     // an int pointer to a memory location that will not change over the course of the generated function's existence
     // essentially a static pointer, only needing to outlive the generated code
     Mem absolute_address(int_jt* address) {
-        jassert::check(address, "Absolute address is null");
+        Jassert::check(address, "Absolute address is null");
         return Mem(_addr(_Mem { SLJIT2_MEM0(), reinterpret_cast<int_jt>(address), _Mem::IS_POINTER }), this);
     }
 
     // a float pointer to a memory location that will not change over the course of the generated function's existence
     // essentially a static pointer, only needing to outlive the generated code
     Mem absolute_address(float_jt* address) {
-        jassert::check(address, "Absolute address is null");
+        Jassert::check(address, "Absolute address is null");
         return Mem(_addr(_Mem { SLJIT2_MEM0(), reinterpret_cast<int_jt>(address), _Mem::IS_POINTER | _Mem::IS_FLOAT}), this);
     }
 
     Mem address_offset(Register address_register, int_jt byte_offset) {
-        jassert::check(byte_offset >= 0, "Absolute address is null");
+        Jassert::check(byte_offset >= 0, "Absolute address is null");
         return Mem(_addr(_Mem { SLJIT2_MEM1(address_register), byte_offset }), this);
     }
 
@@ -558,11 +558,13 @@ public:
             if (value == 0) {
                 return set_zero(dst);
             }
-            MemCopy _dst = dst;
-            write_instr([=]() {
-                sljit2_emit_const(compiler, SPLIT(_dst), value);
-            });
-            return dst;
+//            MemCopy _dst = dst;
+//            binary_op(SLJIT2_MOV)
+//            write_instr([=]() {
+//                sljit2_emit_op2()
+//                sljit2_emit_const(compiler, SPLIT(_dst), value);
+//            });
+//            return dst;
         }
         move(integral_const(value), dst);
         return dst;
@@ -895,6 +897,9 @@ public:
         MemCopy _lhs = lhs;
         MemCopy _rhs = rhs;
         write_instr([=]() {
+//            binary_op(SLJIT2_SUB | SLJIT2_SET_Z, lhs, rhs, Mem::R0);
+//            *jump.jmp = sljit2_emit_jump(compiler, SLJIT2_EQUAL);
+//            *jump.jmp = sljit2_emit_jump(compiler, SLJIT2_JUMP);
             *jump.jmp = sljit2_emit_cmp(compiler, SLJIT2_EQUAL, SPLIT(_lhs), SPLIT(_rhs));
         });
         return jump;

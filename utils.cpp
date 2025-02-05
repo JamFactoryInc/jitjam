@@ -4,9 +4,9 @@
 
 #include "utils.h"
 
-void jassert::_internal::_check(const char *file, const int line, bool cond, const char *msg, std::initializer_list<Arg> args) {
+void Jassert::check(bool cond, const char *msg, std::initializer_list<Arg> args) {
     if (!cond) {
-        logger::_format(std::cerr, "Assertion failed at {}:{}\n", {file, line});
+        logger::_format(std::cerr, "Assertion failed\n", {});
         if (msg) {
             logger::_format(std::cerr, msg, args);
         }
@@ -16,13 +16,13 @@ void jassert::_internal::_check(const char *file, const int line, bool cond, con
 }
 
 
-void jassert::_internal::_check(const char *file, const int line, bool cond, const char *msg) {
-    jassert::_internal::_check(file, line, cond, msg, {});
-}
-
-void jassert::_internal::_check(const char *file, const int line, bool cond) {
-    jassert::_internal::_check(file, line, cond, nullptr, {});
-}
+//void Jassert::_check(const char *file, const int line, bool cond, const char *msg) {
+//    Jassert::_check(file, line, cond, msg, {});
+//}
+//
+//void Jassert::_check(const char *file, const int line, bool cond) {
+//    Jassert::_check(file, line, cond, nullptr, {});
+//}
 
 inline void logger::info(const char *msg, std::initializer_list<Arg> args) {
     std::cout << "[INFO ] ";
