@@ -6,6 +6,8 @@
 
 TEST_SUITE("Codegen Tests") {
 
+    static int_jt static_out = 0;
+
 #define assert_state(gen, _stack_size, _required_registers, _required_float_registers, _args, _float_args) \
         CHECK_EQ(_stack_size, gen.stack_size);\
         CHECK_EQ(_required_registers, gen.required_registers);\
@@ -1411,6 +1413,15 @@ TEST_SUITE("Codegen Tests") {
         return gen.add(a, b, ret);
     }
 
+    Mem add_float_temp_locals(Asm &gen, int arg1, int arg2) {
+        auto a = gen.temp_local<float_jt>();
+        auto b = gen.temp_local<float_jt>();
+        gen.set_constf(a, arg1);
+        gen.set_constf(b, arg2);
+        auto ret = gen.temp_local<float_jt>();
+        return gen.add(a, b, ret);
+    }
+
     TEST_CASE("test sum of temp locals") {
         Asm gen = Asm();
 
@@ -1443,6 +1454,38 @@ TEST_SUITE("Codegen Tests") {
         gen.free_fn(fn);
     }
 
+    TEST_CASE("test sum of float temp locals") {
+        Asm gen = Asm();
+
+        float_jt out_1 = 0;
+        float_jt out_2 = 0;
+        float_jt out_3 = 0;
+
+        Mem sum_1 = add_float_temp_locals(gen, 1.0, 2.0);
+        gen.move(sum_1, gen.absolute_address(&out_1));
+
+        Mem sum_2 = add_float_temp_locals(gen, 10.0, 20.0);
+        gen.move(sum_2, gen.absolute_address(&out_2));
+
+        Mem sum_3 = add_float_temp_locals(gen, 100.0, 200.0);
+        gen.move(sum_3, gen.absolute_address(&out_3));
+
+        gen.return_void();
+
+        auto fn = gen.compile<void>();
+        fn();
+
+        CHECK_EQ(1.0 + 2.0, out_1);
+        CHECK_EQ(10.0 + 20.0, out_2);
+        CHECK_EQ(100.0 + 200.0, out_3);
+
+        // 16 for the 2 temp ints used in each function,
+        // and 8 * 3 for the 3 return values kept alive by our sum_1 - 3
+        assert_state(gen, 16 + 8 * 3, 0, 1, 0, 0)
+
+        gen.free_fn(fn);
+    }
+
     TEST_CASE("test sum of temp locals 2") {
         Asm gen = Asm();
 
@@ -1479,62 +1522,78 @@ TEST_SUITE("Codegen Tests") {
         gen.free_fn(fn);
     }
 
-    TEST_CASE("test sum of temp locals 2") {
+    TEST_CASE("test static function call") {
+
         Asm gen = Asm();
 
-        int_jt out_1 = 0;
-        int_jt out_2 = 0;
+        void (*fn_ptr)() = []() {
+            static_out = 12345;
+        };
 
-        {
-            auto a = gen.local_variable<int_jt>();
-            auto b = gen.temp_local<int_jt>();
-        }
-
-        Mem sum_2 {};
-        {
-            auto a = gen.temp_local<int_jt>();
-            auto b = gen.temp_local<int_jt>();
-            gen.set_const(a, 10);
-            gen.set_const(b, 20);
-            auto ret = gen.temp_local<int_jt>();
-            sum_2 = gen.add(a, b, ret);
-        }
-        gen.move(sum_2, gen.absolute_address(&out_2));
+        Mem local_fn_ptr = gen.reg();
+        gen.call_static(fn_ptr, FunctionSignature());
 
         gen.return_void();
+
+        static_out = 0;
 
         auto fn = gen.compile<void>();
         fn();
 
-        CHECK_EQ(10 + 20, out_2);
-
-        // 16 for the 2 temp ints used in each function,
-        // and 8 * 3 for the 3 return values kept alive by our sum_1 - 3
-        assert_state(gen, 24, 0, 0, 0, 0)
+        CHECK_EQ(12345, static_out);
 
         gen.free_fn(fn);
     }
 
-    TEST_CASE("test sum of temp locals 2") {
+    TEST_CASE("test dynamic function call") {
+
         Asm gen = Asm();
 
-        auto print_fn = []() {
+        void (*fn_ptr)(int_jt) = [](int_jt value) {
+            static_out = value;
+        };
+
+        Mem local_fn_ptr = gen.reg();
+        gen.set_const(local_fn_ptr, (int_jt) fn_ptr);
+
+        Mem arg1 = gen.reg();
+        gen.set_const(arg1, 12345);
+        gen.call_dynamic(
+            local_fn_ptr,
+            FunctionSignature(ABIArgType::TYPE_VOID, ABIArgType::TYPE_WORD),
+            gen.get_call_args({ arg1 })
+        );
+
+        gen.return_void();
+
+        static_out = 0;
+
+        auto fn = gen.compile<void>();
+        fn();
+
+        CHECK_EQ(12345, static_out);
+
+        gen.free_fn(fn);
+    }
+
+    TEST_CASE("test caller-saved scratch registers") {
+        Asm gen = Asm();
+
+        void (*print_fn)() = []() {
             std::cout << "Hello, world!" << std::endl;
         };
 
-        // TODO: figure out how to store / restore scratch registers before and after function call
-        // we have to load them to the stack, but we'll have to figure out how to minimise stack usage by loading / restoring only the in-use registers
-        // use float_registers_in_use & general_registers_in_use
-        Mem val = gen.set_const(gen.temp_local<int_jt>(), 123);
+        Mem freg = gen.set_constf(gen.float_reg(), 123.0);
 
-        gen.call_static(print_fn);
+        gen.call_static((void *) print_fn, FunctionSignature());
 
-        gen.return_value(val);
 
-        auto fn = gen.compile<int_jt>();
-        int_jt result = fn();
+        gen.return_value(freg);
 
-        CHECK_EQ(123, result);
+        auto fn = gen.compile<float_jt>();
+        float_jt result = fn();
+
+        CHECK_EQ(123.0, result);
 
         gen.free_fn(fn);
     }

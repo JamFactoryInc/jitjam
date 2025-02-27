@@ -13,9 +13,23 @@
 
 typedef int ReservationId;
 
+enum AllocationTarget: int8_t {
+    // no target is defined
+    AUTO,
+    // target must be a general register
+    GENERAL_REGISTER,
+    // target must be a float register
+    FLOAT_REGISTER,
+    // target must be on the stack
+    STACK,
+    // target must be on the heap
+    HEAP,
+};
+
 struct MemReservation {
-    const ReservationId id;
-    const int start_iter;
+    ReservationId id;
+    int start_iter;
+
     int end_iter = -1;
     // number of 8-byte words this reservation requires
     uint16_t lane_count;
@@ -53,7 +67,7 @@ struct MemReservationPtr {
 
     MemReservationPtr(MemReservation *ptr): ptr(ptr) { }
 
-    MemReservation &operator *() {
+    MemReservation &operator *() const {
         return *ptr;
     }
 
@@ -66,7 +80,7 @@ struct MemReservationPtr {
 struct IterData {
     std::multiset<MemReservationPtr, std::greater<MemReservationPtr>> reservations;
     int required_lanes = 0; // sort by this desc
-    int iter;
+    int iter = 0;
 
     IterData() = default;
     IterData(int iter): iter(iter) {
@@ -211,7 +225,7 @@ struct MemPacker {
 
         // iterating from most concurrent reservations to fewest
         int reserved_count = 0;
-        for (auto iter : iters) {
+        for (const auto& iter : iters) {
             for (auto rsvn : iter.reservations) {
                 auto &reservation = *rsvn;
                 if (reservation.reserved_count >= reservation.lane_count) continue;

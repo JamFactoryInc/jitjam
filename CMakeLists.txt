@@ -9,13 +9,18 @@ ENDIF(MACRO_ALIASING)
 
 add_library(jitjam STATIC
         utils.cpp
-        asm.h
-        mem.cpp
-        bytecode.h
-        optimizer.h
+        compiler/codegen/asm.h
+        compiler/codegen/mem.cpp
+        compiler/preprocess/bytecode.h
         sljit/src/sljitLir.h sljit/src/sljitLir.cpp
-        memory_prealloc.h
-        _utils.h
+        compiler/mempack/memory_prealloc.h
+        sljit_interop/arg_type_utils.h
+        timeline_map.h
+        compiler/preprocess/bytecode.cpp
+        compiler/preprocess/runtime_values.h
+        compiler/preprocess/handles.h
+        compiler/preprocess/variable_bounds.h
+        compiler/preprocess/engine/preprocess_engine.h
 )
 
 add_executable(tests tests/doctest.h

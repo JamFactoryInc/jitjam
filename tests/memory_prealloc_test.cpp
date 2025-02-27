@@ -3,7 +3,7 @@
 //
 
 #include "memory_prealloc_test.h"
-#include "../memory_prealloc.h"
+#include "../compiler/mempack/memory_prealloc.h"
 #include <chrono>
 
 TEST_SUITE("Mempack Tests") {

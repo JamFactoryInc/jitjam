@@ -8,8 +8,9 @@
 #include <memory>
 #include <type_traits>
 #include <iostream>
-#include <cassert>
 #include <cstdint>
+#include <libunwind.h>
+#include <cxxabi.h>
 
 
 struct Arg {
@@ -31,18 +32,6 @@ namespace logger {
 }
 
 struct Jassert {
-    template<const int LINE, const char* FILE>
-    struct _internal {
-        const char *file;
-        const int line;
-
-//        static void _check(bool cond, const char *msg, std::initializer_list<Arg> args);
-//        static void _check(bool cond, const char *msg);
-//        static void _check(bool cond);
-
-//        static void check(bool cond, const char *msg = nullptr, std::initializer_list<Arg> args = {});
-
-    };
 
     // Asserts that the passed condition is true.
     // The second arg may be a message string, and following args will be used as format args for the message
@@ -51,24 +40,11 @@ struct Jassert {
     static void check(bool cond, const char *msg = nullptr, std::initializer_list<Arg> args = {});
 };
 
+namespace utils {
+    void print_backtrace(bool skip_first = false);
+    void raise(const char *msg, std::initializer_list<Arg> args);
 
-
-//const Jassert jassert;
-
-//#define _check_args(...) _internal::_check(__VA_ARGS__)
-//
-//#undef jassert
-//#define jassert Jassert::_internal { __FILE__, __LINE__ }
-
-
-//constexpr std::initializer_list<char> test1(const char test[1]) {
-//    return {};
-//}
-//
-//
-//void test() {
-//    static constexpr const char *X = "";
-//    Jassert::_internal<1, X>;
-//}
+    std::string demangle_type_name(const char* mangled_name);
+}
 
 #endif //JITJAM_UTILS_H

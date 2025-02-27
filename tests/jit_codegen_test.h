@@ -7,7 +7,7 @@
 
 #include "doctest.h"
 #include "test_utils.h"
-#include "../asm.h"
+#include "../compiler/codegen/asm.h"
 #include <cstdio>
 #include <chrono>
 #include <ctime>

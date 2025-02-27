@@ -5,7 +5,7 @@
 #ifndef GODOT_JIT_TYPES_H
 #define GODOT_JIT_TYPES_H
 
-#include "sljit/src/sljitLir.h"
+#include "../sljit/src/sljitLir.h"
 
 namespace jt {
     typedef sljit2_sw int_jt;

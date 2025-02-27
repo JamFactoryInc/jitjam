@@ -6,8 +6,9 @@
 #define SLJIT2_ASM_H
 
 #include "mem.h"
-#include "utils.h"
-#include "memory_prealloc.h"
+#include "../../utils.h"
+#include "../../sljit_interop/arg_type_utils.h"
+#include "../mempack/memory_prealloc.h"
 #include <vector>
 #include <functional>
 #include <unordered_set>
@@ -18,43 +19,9 @@ using namespace jt;
 
 #define SPLIT(mem) mem->arg_1, mem->arg_2
 
-enum AbiArgType {
-    TYPE_VOID = SLJIT2_ARG_TYPE_RET_VOID,
-    TYPE_WORD = SLJIT2_ARG_TO_TYPE(W),
-    TYPE_POINTER = SLJIT2_ARG_TO_TYPE(P),
-    TYPE_FLOAT = SLJIT2_ARG_TO_TYPE(F64),
-};
-
-template<typename T>
-struct ArgTypeOf {
-    static const AbiArgType value;
-    static int uses_float_reg();
-    static int uses_int_reg();
-};
-
-template<>
-struct ArgTypeOf<void> {
-    static const AbiArgType value = AbiArgType::TYPE_VOID;
-    static int uses_float_reg() { return false; }
-    static int uses_int_reg() { return false; }
-};
-template<>
-struct ArgTypeOf<int_jt> {
-    static const AbiArgType value = AbiArgType::TYPE_WORD;
-    static int uses_float_reg() { return false; }
-    static int uses_int_reg() { return true; }
-};
-template<typename T>
-struct ArgTypeOf<T*> {
-    static const AbiArgType value = AbiArgType::TYPE_POINTER;
-    static int uses_float_reg() { return false; }
-    static int uses_int_reg() { return true; }
-};
-template<>
-struct ArgTypeOf<float_jt> {
-    static const AbiArgType value = AbiArgType::TYPE_FLOAT;
-    static int uses_float_reg() { return true; }
-    static int uses_int_reg() { return false; }
+struct SavedRegisters {
+    std::vector<int> from_reg_index;
+    std::vector<Mem> to;
 };
 
 struct Asm {
@@ -65,6 +32,7 @@ struct Asm {
     std::vector<std::function<void()>> constructor = std::vector<std::function<void()>>();
     std::vector<std::function<void()>> instructions = std::vector<std::function<void()>>();
     std::vector<std::function<void()>> destructor = std::vector<std::function<void()>>();
+
 
     std::unordered_map<int_jt, _Mem> constants = std::unordered_map<int_jt, _Mem>();
     // this holds all the values of our returned _Mem pointers
@@ -77,7 +45,7 @@ struct Asm {
     MemPacker mempack = MemPacker();
 
     // keyed-into via ReservationId
-    std::vector<int> reservation_counts = std::vector<int>(8, 0);
+    std::vector<ReservationId> reservation_counts = std::vector<ReservationId>(8, 0);
     std::vector<_Mem*> preallocated_stack_temporaries = std::vector<_Mem*>();
 
     int float_registers_in_use[SLJIT2_NUMBER_OF_FLOAT_REGISTERS + 1] = { 0 };
@@ -141,7 +109,7 @@ struct Asm {
         if (!is_initialized) {
             initialized_floats.insert(reg->arg_1);
             int arg_number = SLJIT2_NUMBER_OF_FLOAT_REGISTERS - reg->arg_1;
-            // copy our float reg to the associated save reg so we can freely use it as temp memory
+            // copy our float reg to the associated save reg, so we can freely use it as temp memory
             write_init([=]() {
                 sljit2_emit_fop1(compiler, SLJIT2_MOV_F64, SLJIT2_FS(arg_number), 0, SLJIT2_FR(arg_number), 0);
             });
@@ -166,12 +134,71 @@ struct Asm {
         }
     }
 
-    void pre_call_save() {
+    SavedRegisters save_float_scratches() {
+        std::vector<int> from_reg_index = std::vector<int>();
+        std::vector<Mem> to_mem = std::vector<Mem>();
+        for (int i = 0; i < SLJIT2_NUMBER_OF_SCRATCH_FLOAT_REGISTERS; ++i)
+        {
+            int scratch_register_index = SLJIT2_FR(i);
+            if (float_registers_in_use[scratch_register_index] > 0)
+            {
+                auto register_mem = &float_registers[scratch_register_index];
+                Mem stack_location = temp_local<float_jt>();
+                from_reg_index.push_back(scratch_register_index);
+                to_mem.emplace_back(stack_location);
 
+                move(Mem(register_mem, this), stack_location);
+            }
+        }
+
+        return SavedRegisters {
+            from_reg_index,
+            to_mem
+        };
     }
 
-    void post_call_restore() {
+    SavedRegisters save_general_scratches() {
+        std::vector<int> from_reg_index = std::vector<int>();
+        std::vector<Mem> to_mem = std::vector<Mem>();
 
+        for (int i = 0; i < SLJIT2_NUMBER_OF_SCRATCH_REGISTERS; ++i)
+        {
+            int scratch_register_index = SLJIT2_R(i);
+            if (general_registers_in_use[scratch_register_index] > 0)
+            {
+                auto register_mem = &general_registers[scratch_register_index];
+                Mem stack_location = temp_local<int_jt>();
+                from_reg_index.push_back(scratch_register_index);
+                to_mem.emplace_back(stack_location);
+
+                move(Mem(register_mem, this), stack_location);
+            }
+        }
+
+        return SavedRegisters {
+            from_reg_index,
+            to_mem
+        };
+    }
+
+    void restore_float_scratches(SavedRegisters saved_registers) {
+        for (int i = 0; i < saved_registers.from_reg_index.size(); ++i) {
+            auto float_reg_index = saved_registers.from_reg_index[i];
+            auto register_mem = &float_registers[float_reg_index];
+
+            auto stack_mem = saved_registers.to[i];
+            move(stack_mem, Mem(register_mem, this));
+        }
+    }
+
+    void restore_general_scratches(SavedRegisters saved_registers) {
+        for (int i = 0; i < saved_registers.from_reg_index.size(); ++i) {
+            auto reg_index = saved_registers.from_reg_index[i];
+            auto register_mem = &general_registers[reg_index];
+
+            auto stack_mem = saved_registers.to[i];
+            move(stack_mem, Mem(register_mem, this));
+        }
     }
 
     int get_general_scratch() {
@@ -215,6 +242,11 @@ struct Asm {
             }
         }
         return -1;
+    }
+
+    // gets an address to the given _Mem value that lives as long as the enclosing Asm instance in the same thread
+    _Mem *_addr(_Mem value) {
+        return backings.add(value);
     }
 
 public:
@@ -388,9 +420,14 @@ public:
         return sljit2_generate_code(compiler, 0, nullptr);
     }
 
-    // gets an address to the given _Mem value that lives as long as the enclosing Asm instance in the same thread
-    _Mem *_addr(_Mem value) {
-        return backings.add(value);
+    std::vector<Mem> get_call_args(std::initializer_list<Mem> list)
+    {
+        auto locations = std::vector<Mem>();
+        for( auto &elem : list )
+        {
+            locations.emplace_back(elem);
+        }
+        return locations;
     }
 
     template<typename T>
@@ -401,6 +438,16 @@ public:
     template<typename T>
     Mem temp_local() {
         auto mem = _addr(_Mem(mempack.reserve(sizeof(T))));
+        preallocated_stack_temporaries.push_back(mem);
+        return Mem(mem, this);
+    }
+
+    template<>
+    Mem temp_local<float_jt>() {
+        auto mem = _addr(_Mem(
+            mempack.reserve(sizeof(float_jt)),
+            _Mem::IS_FLOAT
+        ));
         preallocated_stack_temporaries.push_back(mem);
         return Mem(mem, this);
     }
@@ -829,67 +876,61 @@ public:
     }
 
     void call_static_fast(void (*fn_ptr)()) {
+        auto saved_floats = save_float_scratches();
+        auto saved_generals = save_general_scratches();
+
         auto fn_ptr_int = (sljit2_uw)(fn_ptr);
         write_instr([=]() {
             sljit2_jump *jmp = sljit2_emit_jump(compiler, SLJIT2_FAST_CALL);
             sljit2_set_target(jmp, fn_ptr_int);
         });
+
+        restore_float_scratches(saved_floats);
+        restore_general_scratches(saved_generals);
     }
 
-    void call_static(void (*fn_ptr)()) {
-        auto fn_ptr_int = (sljit2_uw)(fn_ptr);
+    template<typename T>
+    void call_static(T fn_ptr, FunctionSignature signature) {
+        auto saved_floats = save_float_scratches();
+        auto saved_generals = save_general_scratches();
+
+        auto fn_ptr_int = (sljit2_uw)reinterpret_cast<void*(*)()>(fn_ptr);
         write_instr([=]() {
             sljit2_jump *jmp = sljit2_emit_call(compiler, SLJIT2_CALL, SLJIT2_ARGS0V());
             sljit2_set_target(jmp, fn_ptr_int);
         });
+
+        restore_float_scratches(saved_floats);
+        restore_general_scratches(saved_generals);
     }
 
-//    void alloc(Mem bytes, Mem alignment) {
-//        fast_call([] () { malloc() })
-//    }
+    void call_dynamic(Mem fn_ptr_location, FunctionSignature signature, std::vector<Mem> call_args) {
+        auto saved_floats = save_float_scratches();
+        auto saved_generals = save_general_scratches();
 
-//    template<typename T>
-//    Mem dereference(Mem ptr_location, Mem dst) {
-//        if (!ptr_location->is_pointer()) {
-//            throw std::runtime_error("dereferenced value is not a pointer");
-//        }
-//        if (ptr_location->is_root_type_float() != dst->is_float()) {
-//            throw std::runtime_error("cannot store dereferenced value in destination with incompatible type");
-//        }
-//        if (dst->is_register()) {
-//            throw std::runtime_error("storing a dereferenced value into a register is not supported");
-//        }
-//        auto alignment = alignof(T);
-//        if (ptr_location->is_root_type_float()) {
-//            // both floats
-//            coerce_floats(ptr_location, dst);
-//            require_memory({ ptr_location, dst });
-//            move(ptr_location, Mem::R0);
-//            write_instr([=]() {
-//               sljit2_emit_mem(compiler, SLJIT2_MOV_F64, SLJIT2_MEM1());
-//            });
-//        } else {
-//            // neither floats
-//            require_memory({ ptr_location, dst });
-//        }
-//        return dst;
-//    }
+        int float_count = 0;
+        int int_count = 0;
+        for (auto & mem : call_args) {
+            if (mem->is_float()) {
+                int register_index = SLJIT2_FR(float_count++);
+                auto safe_reg = &float_registers[register_index];
+                move(mem, Mem(safe_reg, this));
+            } else {
+                int register_index = SLJIT2_R(int_count++);
+                auto safe_reg = &general_registers[register_index];
+                move(mem, Mem(safe_reg, this));
+            }
+        }
 
-//    Mem get_address_of(Mem src, Mem dst) {
-//        if (ptr_location->is_root_type_float()) {
-//            // both floats
-//            coerce_floats(ptr_location, dst);
-//            require_memory({ ptr_location, dst });
-//            move(ptr_location, Mem::R0);
-//            write_instr([=]() {
-//                sljit2_emit_op1(compiler, SLJIT2_MOV_F64, SLJIT2_MEM1());
-//            });
-//        } else {
-//            // neither floats
-//            require_memory({ ptr_location, dst });
-//        }
-//        return dst;
-//    }
+        MemCopy _loc = fn_ptr_location;
+
+        write_instr([=]() {
+            sljit2_emit_icall(compiler, SLJIT2_CALL, signature.as_sljit_args(), SPLIT(_loc));
+        });
+
+        restore_float_scratches(saved_floats);
+        restore_general_scratches(saved_generals);
+    }
 
     Jump jump() {
         Jump jump = Jump();
@@ -899,7 +940,7 @@ public:
         return jump;
     }
 
-    Jump jump_if_true(Mem cond) {
+    Jump jump_if_true(Mem &cond) {
         Mem zero = Mem::R0;
         if (cond == Mem::R0) {
             zero = Mem::R1;
@@ -909,7 +950,7 @@ public:
         return jump_if_not_equal(cond, zero);
     }
 
-    Jump jump_if_false(Mem cond = Mem::R0) {
+    Jump jump_if_false(Mem &cond = Mem::R0) {
         Mem zero = Mem::R0;
         if (cond == Mem::R0) {
             zero = Mem::R1;

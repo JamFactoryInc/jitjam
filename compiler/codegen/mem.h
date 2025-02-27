@@ -5,12 +5,12 @@
 #ifndef SLJIT2_MEM_H
 #define SLJIT2_MEM_H
 
-#include "sljit/src/sljitLir.h"
+#include "../../sljit/src/sljitLir.h"
 
-#include "jit_types.h"
+#include "../../sljit_interop/jit_types.h"
 #include "constructed_type.h"
-#include "memory_prealloc.h"
-#include "utils.h"
+#include "../mempack/memory_prealloc.h"
+#include "../../utils.h"
 #include <memory>
 #include <unordered_map>
 #include <memory>
@@ -25,7 +25,6 @@ struct Jump {
     std::shared_ptr<sljit2_jump*> jmp;
 
 public:
-
     Jump() {
         this->jmp = std::make_shared<sljit2_jump*>();
     }
@@ -167,6 +166,7 @@ struct _Mem {
         arg_1(_arg_1),
         arg_2(_arg_2) { }
     _Mem(MemReservation reservation): _Mem(reservation.id, -1, IS_LOCAL | IS_TEMP_RESERVED) { }
+    _Mem(MemReservation reservation, int _flags): _Mem(reservation.id, -1, _flags | IS_LOCAL | IS_TEMP_RESERVED) { }
 
     constexpr inline bool has_all_flags(int _flags) const {
         return (flags & _flags) == _flags;
@@ -385,8 +385,18 @@ public:
     }
 };
 
+/**
+ * A temporary rvalue type to allow passing a _Mem into a pass-by-copy lambda
+ * This is required, as copying a Mem instance will mess with the register allocation logic
+ */
 struct MemCopy {
     _Mem *_mem;
+
+    MemCopy() {
+
+    }
+
+    // NOLINT(*-explicit-constructor)
     MemCopy(Mem &mem) {
         _mem = mem._mem;
     }
