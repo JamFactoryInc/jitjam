@@ -4,8 +4,8 @@
 #ifndef JITJAM_RUNTIME_VALUES_H
 #define JITJAM_RUNTIME_VALUES_H
 
-#include "../../sljit_interop/jit_types.h"
-#include "handles.h"
+#include "../../../sljit_interop/jit_types.h"
+#include "../../../handles/handles.h"
 
 using namespace jt;
 
