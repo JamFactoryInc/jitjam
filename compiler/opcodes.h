@@ -23,6 +23,18 @@ namespace Op {
         Subtract,
         Multiply,
         Divide,
+        /**
+         * Global JitJam 'modulo' definition:
+         * The sign of the result is determined only by the sign of the numerator.
+         *
+         * @code
+         * -1 % x // negative where x != 0
+         * @endcode
+         *
+         * @code
+         * 1 % x // positive where x != 0
+         * @endcode
+         */
         Mod,
         BitXor,
         BitOr,

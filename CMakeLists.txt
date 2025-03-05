@@ -33,6 +33,7 @@ add_library(jitjam STATIC
         compiler/preprocess/constraints/variable_constraints.h
         compiler/preprocess/variable_type.h
         compiler/preprocess/block.cpp
+        checked_ops.h
 )
 
 add_executable(tests tests/doctest.h
@@ -42,6 +43,8 @@ add_executable(tests tests/doctest.h
         tests/jit_codegen_test.cpp
         tests/memory_prealloc_test.h
         tests/memory_prealloc_test.cpp
+        tests/test_variable_bounds.cpp
+        tests/test_variable_bounds.h
 )
 
 target_link_libraries(tests jitjam)

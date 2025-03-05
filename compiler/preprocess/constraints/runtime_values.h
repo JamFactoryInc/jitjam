@@ -5,9 +5,14 @@
 #define JITJAM_RUNTIME_VALUES_H
 
 #include "../../../sljit_interop/jit_types.h"
-#include "../../../handles/handles.h"
+#include "../../../handles/handle_impls.h"
 
 using namespace jt;
+
+enum RuntimeValueType {
+    Int,
+    Float
+};
 
 union RuntimeValue {
     int_jt int_value;

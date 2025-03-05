@@ -342,13 +342,53 @@ TEST_SUITE("Codegen Tests") {
         gen.return_value(res);
 
         auto fn = gen.compile<int_jt, int_jt, int_jt>();
-        int_jt result = fn(15, 11);
 
-        CHECK_EQ(4, result);
         assert_state(gen, 0, 2, 0, 2, 0)
+
+        SUBCASE("+ % +") {
+            CHECK_EQ(3, fn(3, 5));
+            CHECK_EQ(1, fn(6, 5));
+        }
+
+        SUBCASE("- % +") {
+            CHECK_EQ(-3, fn(-3, 5));
+            CHECK_EQ(-1, fn(-6, 5));
+        }
+
+        SUBCASE("+ % -") {
+            CHECK_EQ(3, fn(3, -5));
+            CHECK_EQ(1, fn(6, -5));
+        }
+
+        SUBCASE("- % -") {
+            CHECK_EQ(-3, fn(-3, -5));
+            CHECK_EQ(-1, fn(-6, -5));
+        }
 
         gen.free_fn(fn);
     }
+
+    TEST_CASE("test int % -int") {
+        Asm gen = Asm();
+
+        auto a = gen.arg(0);
+        auto b = gen.arg(1);
+        auto res = gen.mod(a, b, Mem::R0);
+        gen.return_value(res);
+
+        auto fn = gen.compile<int_jt, int_jt, int_jt>();
+
+        assert_state(gen, 0, 2, 0, 2, 0)
+
+        int_jt result = fn(3, -5);
+        CHECK_EQ(3, result);
+
+        result = fn(6, -5);
+        CHECK_EQ(1, result);
+
+        gen.free_fn(fn);
+    }
+
 
     TEST_CASE("test int < int") {
         Asm gen = Asm();
